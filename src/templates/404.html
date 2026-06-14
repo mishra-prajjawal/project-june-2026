@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="min-h-[70vh] flex flex-col items-center justify-center px-4 py-16">
+  <div class="max-w-md w-full bg-white p-8 rounded-3xl border border-gray-100 shadow-xl flex flex-col items-center text-center gap-6">
+    
+    <!-- Graphic / Icon -->
+    <div class="w-24 h-24 rounded-full bg-brand-orange-light border border-brand-orange/15 flex items-center justify-center shadow-inner text-4xl">
+      🔍
+    </div>
+
+    <!-- Error Detail -->
+    <div class="flex flex-col gap-2">
+      <h2 class="text-3xl font-extrabold text-gray-900">Page Not Found</h2>
+      <p class="text-xs text-brand-orange font-bold">Error 404</p>
+      <p class="text-xs text-gray-500 mt-2">
+        We searched high and low but couldn't find the page you are looking for. It might have been moved, deleted, or never existed in the first place.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="w-full flex flex-col gap-3 border-t border-gray-50 pt-6">
+      <a href="{% url 'dashboard' %}" class="w-full py-3.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl shadow transition duration-200">
+        Go to Dashboard
+      </a>
+      <a href="{% url 'core:home' %}" class="w-full py-3 border border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition">
+        Return Home
+      </a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

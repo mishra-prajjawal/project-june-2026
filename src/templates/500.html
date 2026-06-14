@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Server Error - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="min-h-[70vh] flex flex-col items-center justify-center px-4 py-16">
+  <div class="max-w-md w-full bg-white p-8 rounded-3xl border border-gray-100 shadow-xl flex flex-col items-center text-center gap-6">
+    
+    <!-- Graphic / Icon -->
+    <div class="w-24 h-24 rounded-full bg-red-50 border border-red-100 flex items-center justify-center shadow-inner text-4xl">
+      💥
+    </div>
+
+    <!-- Error Detail -->
+    <div class="flex flex-col gap-2">
+      <h2 class="text-3xl font-extrabold text-gray-900">System Error</h2>
+      <p class="text-xs text-red-600 font-bold">Error 500</p>
+      <p class="text-xs text-gray-500 mt-2">
+        Something went wrong on our server. We are logging the issue and will get it fixed shortly. Please try reloading the page.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="w-full flex flex-col gap-3 border-t border-gray-50 pt-6">
+      <button onclick="window.location.reload()" class="w-full py-3.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl shadow transition duration-200">
+        Reload Page
+      </button>
+      <a href="{% url 'core:home' %}" class="w-full py-3 border border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 transition">
+        Return Home
+      </a>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

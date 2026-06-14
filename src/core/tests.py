@@ -9,3 +9,11 @@ class HomeViewTests(TestCase):
         response = self.client.get(reverse('core:home'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/home.html')
+
+    def test_handler404_loads_custom_template(self):
+        """
+        Verify that hitting a non-existent URL triggers our custom 404 handler and template.
+        """
+        response = self.client.get('/some-non-existent-page/')
+        self.assertEqual(response.status_code, 404)
+        self.assertTemplateUsed(response, '404.html')

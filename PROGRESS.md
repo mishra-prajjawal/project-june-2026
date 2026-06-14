@@ -73,7 +73,7 @@
 - [x] NGO dashboard
 - [x] Admin panel
 - [x] Analytics/impact report
-- [ ] 404 / empty / error states
+- [x] 404 / empty / error states
 
 ## UI/UX bar
 - [ ] Mobile-first, fast on entry-level phones
