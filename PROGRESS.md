@@ -59,10 +59,11 @@
 
 
 ## Analytics / impact
-- [ ] Total servings/KG saved
-- [ ] Per-user Social Impact Score
-- [ ] Charts on report page
+- [x] Total servings/KG saved
+- [x] Per-user Social Impact Score
+- [x] Charts on report page
 - [x] Leaderboard on landing/home
+
 
 
 ## Screens
@@ -71,7 +72,7 @@
 - [x] Donor dashboard
 - [x] NGO dashboard
 - [x] Admin panel
-- [ ] Analytics/impact report
+- [x] Analytics/impact report
 - [ ] 404 / empty / error states
 
 ## UI/UX bar

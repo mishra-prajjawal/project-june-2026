@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Social Impact Analytics - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Social Impact Report</h1>
+      <p class="text-sm text-gray-500 mt-1">Platform-wide food waste reduction metrics and environmental savings.</p>
+    </div>
+    <span class="text-xs font-bold text-brand-green bg-brand-green-light px-3 py-1 rounded-full border border-brand-green/10">
+      Live Impact Metrics
+    </span>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Stat 1: Servings Saved -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-brand-green-light rounded-xl">🍲</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Servings Rescued</h3>
+        <p class="text-3xl font-extrabold text-brand-green mt-0.5">{{ metrics.total_servings }}</p>
+      </div>
+    </div>
+
+    <!-- Stat 2: KGs Rescued -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-green-50 rounded-xl">⚖</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Estimated Kilograms</h3>
+        <p class="text-3xl font-extrabold text-gray-900 mt-0.5">{{ metrics.total_kgs }} kg</p>
+      </div>
+    </div>
+
+    <!-- Stat 3: Listings Saved -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-blue-50 rounded-xl">📦</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Listings Rescued</h3>
+        <p class="text-3xl font-extrabold text-gray-900 mt-0.5">{{ metrics.total_listings_saved }}</p>
+      </div>
+    </div>
+
+    <!-- Stat 4: Quality Score -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-yellow-50 rounded-xl">🔬</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Quality Approval</h3>
+        <p class="text-3xl font-extrabold text-brand-orange mt-0.5">{{ metrics.quality_rate }}%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Personal Score card (Only for Donor role) -->
+  {% if user.role == 'Donor' %}
+    <div class="bg-brand-green-light/35 border border-brand-green/10 rounded-3xl p-6 sm:p-8 shadow-inner flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div class="flex items-start gap-4">
+        <span class="text-4xl p-2 bg-white rounded-2xl shadow">🏅</span>
+        <div>
+          <h2 class="text-xl font-bold text-brand-green-dark">Your Social Contribution</h2>
+          <p class="text-xs text-brand-green-dark/70 mt-0.5">Your personal listings summary and gamified score updates.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-8 flex-wrap">
+        <div>
+          <div class="text-[10px] uppercase font-bold text-gray-400">Your Listings Rescued</div>
+          <div class="text-xl font-extrabold text-gray-900">{{ metrics.my_listings }}</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-gray-400">Your Servings Rescued</div>
+          <div class="text-xl font-extrabold text-gray-900">{{ metrics.my_servings }}</div>
+        </div>
+        <div>
+          <div class="text-[10px] uppercase font-bold text-gray-400">Leaderboard Score</div>
+          <div class="text-xl font-extrabold text-brand-green">{{ user.impact_score }} pts</div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Chart Panels -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Platform Growth Bar Chart -->
+    <div class="lg:col-span-2 bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+      <div>
+        <h3 class="font-bold text-gray-900 text-lg">Rescued Servings Trend</h3>
+        <p class="text-xs text-gray-400">Platform-wide cumulative servings rescued over the past 6 months.</p>
+      </div>
+      <div class="h-80 w-full relative">
+        <canvas id="servingsChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Food Quality Doughnut Chart -->
+    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm flex flex-col gap-4">
+      <div>
+        <h3 class="font-bold text-gray-900 text-lg">Quality Safety Audit</h3>
+        <p class="text-xs text-gray-400">Rescued food quality ratings logged post-collection by Recipient NGOs.</p>
+      </div>
+      <div class="h-64 w-full relative flex items-center justify-center">
+        <canvas id="qualityChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ChartJS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Render Bar Chart: Servings Saved
+  const servingsCtx = document.getElementById('servingsChart').getContext('2d');
+  new Chart(servingsCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ chart_data.labels|safe }},
+      datasets: [{
+        label: 'Servings Rescued',
+        data: {{ chart_data.values|safe }},
+        backgroundColor: '#10B981', // brand-green
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { borderDash: [5, 5] }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // Render Doughnut Chart: Quality Audit
+  const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+  const rate = {{ metrics.quality_rate|default:100 }};
+  new Chart(qualityCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Acceptable', 'Issues Reported'],
+      datasets: [{
+        data: [rate, 100 - rate],
+        backgroundColor: ['#10B981', '#F59E0B'], // brand-green, brand-orange
+        borderWidth: 2,
+        borderColor: '#ffffff',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 12, font: { size: 11 } }
+        }
+      },
+      cutout: '75%'
+    }
+  });
+</script>
+{% endblock %}

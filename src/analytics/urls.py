@@ -1,7 +1,8 @@
 from django.urls import path
+from . import views
 
 app_name = 'analytics'
 
 urlpatterns = [
-    # Placeholder URLs
+    path('report/', views.impact_report, name='report'),
 ]
