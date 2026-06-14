@@ -7,4 +7,5 @@ urlpatterns = [
     path('donor/', views.donor_dashboard, name='donor_dashboard'),
     path('ngo/', views.ngo_dashboard, name='ngo_dashboard'),
     path('post/', views.post_donation, name='post_donation'),
+    path('claim/<int:donation_id>/', views.claim_donation_view, name='claim_donation'),
 ]

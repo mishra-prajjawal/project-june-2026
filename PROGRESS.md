@@ -38,21 +38,23 @@
 
 
 ## NGO / Volunteer module
-- [ ] Registration + document upload (awaits verification)
-- [ ] Browse available food (sorted by time, urgency-highlighted)
-- [ ] Claim donation (concurrency-safe lock)
-- [ ] Donor contact reveal + "Call Now" button
+- [x] Registration + document upload (awaits verification)
+- [x] Browse available food (sorted by time, urgency-highlighted)
+- [x] Claim donation (concurrency-safe lock)
+- [x] Donor contact reveal + "Call Now" button
 - [ ] Confirm collection (sets collected_at)
 - [ ] Post-collection quality survey (Yes/No)
-- [ ] Requests table created (future UI flagged)
+- [x] Requests table created (future UI flagged)
 - [ ] Events: donation_claimed, donation_collected
 
+
 ## Core logic
-- [ ] Single claim state-machine service
-- [ ] Concurrency: select_for_update / atomic conditional update
+- [x] Single claim state-machine service
+- [x] Concurrency: select_for_update / atomic conditional update
 - [ ] Concurrency test: simultaneous claims → exactly one wins
-- [ ] Expired items flagged + excluded from claimable list
+- [x] Expired items flagged + excluded from claimable list
 - [ ] Impact points awarded on collection
+
 
 ## Analytics / impact
 - [ ] Total servings/KG saved
@@ -64,7 +66,7 @@
 - [ ] Landing + leaderboard
 - [x] Auth screens
 - [x] Donor dashboard
-- [ ] NGO dashboard
+- [x] NGO dashboard
 - [x] Admin panel
 - [ ] Analytics/impact report
 - [ ] 404 / empty / error states

@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block title %}NGO Dashboard - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">NGO Dashboard</h1>
+      <p class="text-sm text-gray-500 mt-1">Browse nearby fresh food donations, claim items, and confirm collections.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      {% if user.is_verified %}
+        <span class="text-xs font-bold text-brand-green bg-brand-green-light px-3 py-1 rounded-full border border-brand-green/10">
+          ✓ Verified NGO Recipient
+        </span>
+      {% else %}
+        <span class="text-xs font-bold text-brand-orange bg-brand-orange-light px-3 py-1 rounded-full border border-brand-orange/10 animate-pulse">
+          ⚠ Verification Pending
+        </span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Verification Warning Banner -->
+  {% if not user.is_verified %}
+    <div class="p-4 bg-brand-orange-light border border-brand-orange/20 text-brand-orange-dark rounded-2xl flex items-start gap-3 shadow-sm">
+      <span class="text-xl">🔒</span>
+      <div>
+        <h4 class="font-bold text-sm">Account Verification Awaiting Approval</h4>
+        <p class="text-xs text-brand-orange-dark/80 mt-0.5">
+          An administrator must verify your uploaded document before you can lock claims on food listings. You can still browse the live available food feed.
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Tabs Navigation -->
+  <div class="flex border-b border-gray-200" id="tabs">
+    <button onclick="switchTab('feed')" id="tab-feed" class="px-6 py-3 border-b-2 border-brand-green text-sm font-bold text-brand-green transition focus:outline-none">
+      Available Food Feed ({{ available_donations|length }})
+    </button>
+    <button onclick="switchTab('claims')" id="tab-claims" class="px-6 py-3 border-b-2 border-transparent text-sm font-semibold text-gray-500 hover:text-gray-700 transition focus:outline-none">
+      My Claims ({{ my_claims|length }})
+    </button>
+    <button onclick="switchTab('history')" id="tab-history" class="px-6 py-3 border-b-2 border-transparent text-sm font-semibold text-gray-500 hover:text-gray-700 transition focus:outline-none">
+      Pickup History ({{ my_history|length }})
+    </button>
+  </div>
+
+  <!-- Tab Contents -->
+  <div class="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+
+    <!-- Tab 1: Available Food Feed -->
+    <div id="content-feed" class="flex flex-col gap-6">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Live Available Food</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Time-sensitive surplus listings. Urgent listings nearing expiry are highlighted.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="available-feed-container">
+        {% if available_donations %}
+          {% for d in available_donations %}
+            <!-- Donation Card -->
+            <div id="donation-card-{{ d.id }}" class="bg-white rounded-2xl border p-5 flex flex-col justify-between gap-5 transition duration-200 hover:shadow-md 
+              {% if d.is_expired %} border-gray-200 opacity-60 {% elif d.is_expired_soon %} border-brand-orange/40 glow-urgent {% else %} border-gray-100 {% endif %}">
+              
+              <!-- Card Top -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-12 h-12 rounded-xl bg-brand-green-light text-brand-green flex items-center justify-center font-bold text-xl flex-shrink-0">
+                    🍲
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-gray-900 text-base leading-snug">{{ d.food_item }}</h3>
+                    <p class="text-xs text-gray-500 mt-1">Rescuer quantity: <strong class="text-gray-800 font-semibold">{{ d.quantity }}</strong></p>
+                    <p class="text-xs text-gray-400">Posted by {{ d.donor.username }} &bull; {{ d.address }}</p>
+                  </div>
+                </div>
+                
+                <!-- Urgent Status Indicator -->
+                <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider
+                    {% if d.is_expired %} bg-gray-100 text-gray-400 {% else %} bg-brand-orange-light text-brand-orange-dark {% endif %}">
+                    Expires {{ d.expiry_time|time:"g:i A" }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Card Bottom Action -->
+              <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-1">
+                <span class="text-[10px] text-gray-400">Listed: {{ d.created_at|timesince }} ago</span>
+                
+                {% if user.is_verified and not user.is_banned %}
+                  <form action="{% url 'donations:claim_donation' d.id %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="px-4 py-2 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-xs shadow-sm transition">
+                      Claim Food
+                    </button>
+                  </form>
+                {% else %}
+                  <button disabled class="px-4 py-2 bg-gray-100 text-gray-400 font-bold rounded-xl text-xs border border-gray-200 cursor-not-allowed">
+                    Claim Locked
+                  </button>
+                {% endif %}
+              </div>
+
+            </div>
+          {% endfor %}
+        {% else %}
+          <!-- Empty State -->
+          <div class="col-span-full py-16 flex flex-col items-center justify-center gap-2 text-center" id="feed-empty-state">
+            <span class="text-4xl">🌟</span>
+            <h4 class="font-bold text-gray-700 mt-2">No Food Listed Right Now</h4>
+            <p class="text-xs text-gray-400">We will notify you immediately via SSE once a donor lists surplus meals.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Tab 2: My Claims -->
+    <div id="content-claims" class="hidden flex flex-col gap-6">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Your Locked Claims</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Coordinate with the donor directly and confirm pickup below.</p>
+      </div>
+
+      {% if my_claims %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {% for claim in my_claims %}
+            <div class="bg-white rounded-2xl border border-brand-orange/20 shadow-sm p-6 flex flex-col justify-between gap-5">
+              <div class="flex flex-col gap-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-bold text-gray-900 text-lg">{{ claim.food_item }}</h3>
+                  <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-brand-orange-light text-brand-orange-dark border border-brand-orange/10">
+                    Locked Claim
+                  </span>
+                </div>
+                
+                <p class="text-xs text-gray-600">Quantity: <strong>{{ claim.quantity }}</strong></p>
+                
+                <div class="p-3 bg-gray-50 rounded-xl border border-gray-100 flex flex-col gap-1.5 text-xs text-gray-500 mt-1">
+                  <div>📍 <strong>Pickup Address:</strong> {{ claim.address }}</div>
+                  <div>👤 <strong>Donor Contact:</strong> {{ claim.donor.username }} &bull; {{ claim.donor.contact_info }}</div>
+                </div>
+              </div>
+
+              <!-- Action button: Call Now & Confirm -->
+              <div class="flex items-center gap-2 border-t border-gray-50 pt-4 mt-1">
+                <!-- Call Now Action Button (tel link as required) -->
+                <a href="tel:{{ claim.donor.contact_info }}" class="flex-grow inline-flex items-center justify-center px-4 py-2.5 bg-brand-orange hover:bg-brand-orange-accent text-white font-bold rounded-xl text-xs shadow transition">
+                  📞 Call Now
+                </a>
+                
+                <!-- Confirm Collection Form -->
+                <form action="#" method="post" class="flex-grow inline">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-xs shadow transition">
+                    Confirm Pickup
+                  </button>
+                </form>
+              </div>
+
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-12 text-sm text-gray-400">
+          You don't have any active claims. Browse the food feed to claim listings.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Tab 3: Pickup History -->
+    <div id="content-history" class="hidden flex flex-col gap-6">
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Your Rescued Food History</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Logs of all collected donations and submitted quality feedback.</p>
+      </div>
+
+      {% if my_history %}
+        <div class="overflow-x-auto rounded-2xl border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Food Item</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Collected At</th>
+                <th scope="col" class="px-6 py-3.5 class text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quality Feedback</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for h in my_history %}
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {{ h.food_item }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ h.quantity }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ h.collected_at|date:"SHORT_DATETIME_FORMAT" }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if h.quality_feedback %}
+                      {% if h.quality_feedback.acceptable %}
+                        <span class="text-brand-green font-bold flex items-center gap-1">✓ Good Quality</span>
+                      {% else %}
+                        <span class="text-brand-orange font-bold flex items-center gap-1">⚠ Quality issue</span>
+                      {% endif %}
+                    {% else %}
+                      <!-- Direct to survey if empty -->
+                      <a href="#" class="px-2.5 py-1 bg-brand-green-light text-brand-green-dark border border-brand-green/20 font-bold rounded-lg text-xs hover:bg-brand-green/10 transition">
+                        Submit Survey
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-10 text-sm text-gray-400">
+          Rescued donations history will appear here.
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function switchTab(activeTab) {
+    const feedBtn = document.getElementById('tab-feed');
+    const claimsBtn = document.getElementById('tab-claims');
+    const historyBtn = document.getElementById('tab-history');
+    
+    const feedContent = document.getElementById('content-feed');
+    const claimsContent = document.getElementById('content-claims');
+    const historyContent = document.getElementById('content-history');
+
+    // Reset styles
+    feedBtn.className = feedBtn.className.replace('border-brand-green text-brand-green font-bold', 'border-transparent text-gray-500 font-semibold');
+    claimsBtn.className = claimsBtn.className.replace('border-brand-green text-brand-green font-bold', 'border-transparent text-gray-500 font-semibold');
+    historyBtn.className = historyBtn.className.replace('border-brand-green text-brand-green font-bold', 'border-transparent text-gray-500 font-semibold');
+    
+    feedContent.classList.add('hidden');
+    claimsContent.classList.add('hidden');
+    historyContent.classList.add('hidden');
+
+    if (activeTab === 'feed') {
+      feedBtn.className = feedBtn.className.replace('border-transparent text-gray-500 font-semibold', 'border-brand-green text-brand-green font-bold');
+      feedContent.classList.remove('hidden');
+    } else if (activeTab === 'claims') {
+      claimsBtn.className = claimsBtn.className.replace('border-transparent text-gray-500 font-semibold', 'border-brand-green text-brand-green font-bold');
+      claimsContent.classList.remove('hidden');
+    } else if (activeTab === 'history') {
+      historyBtn.className = historyBtn.className.replace('border-transparent text-gray-500 font-semibold', 'border-brand-green text-brand-green font-bold');
+      historyContent.classList.remove('hidden');
+    }
+  }
+
+  // Real-time updates via SSE listeners
+  window.addEventListener('sse:donation_posted', function(e) {
+    const data = e.detail;
+    console.log("NGO Dashboard: New donation posted:", data);
+    
+    const container = document.getElementById('available-feed-container');
+    const emptyState = document.getElementById('feed-empty-state');
+    
+    // Clear empty state if present
+    if (emptyState) emptyState.remove();
+
+    // Create the new card element
+    const card = document.createElement('div');
+    card.id = `donation-card-${data.donation_id}`;
+    card.className = "bg-white rounded-2xl border border-gray-100 p-5 flex flex-col justify-between gap-5 transition duration-200 hover:shadow-md translate-y-4 opacity-0";
+    
+    const formattedTime = new Date(data.expiry_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+    let actionButton = `<span class="text-xs text-gray-400">Verification Pending</span>`;
+    {% if user.is_verified and not user.is_banned %}
+      actionButton = `
+        <form action="/donations/claim/${data.donation_id}/" method="post" class="inline">
+          <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+          <button type="submit" class="px-4 py-2 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-xs shadow-sm transition">
+            Claim Food
+          </button>
+        </form>
+      `;
+    {% endif %}
+
+    card.innerHTML = `
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-start gap-3">
+          <div class="w-12 h-12 rounded-xl bg-brand-green-light text-brand-green flex items-center justify-center font-bold text-xl flex-shrink-0">🍲</div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-base leading-snug">${data.food_item}</h3>
+            <p class="text-xs text-gray-500 mt-1">Rescuer quantity: <strong class="text-gray-800 font-semibold">${data.quantity}</strong></p>
+            <p class="text-xs text-gray-400">Posted by ${data.donor_name} &amp; ${data.address}</p>
+          </div>
+        </div>
+        <div class="flex flex-col items-end gap-1 flex-shrink-0">
+          <span class="text-[10px] font-bold px-2 py-0.5 bg-brand-orange-light text-brand-orange-dark rounded uppercase tracking-wider">
+            Expires ${formattedTime}
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center justify-between border-t border-gray-50 pt-4 mt-1">
+        <span class="text-[10px] text-gray-400">Listed: Just now</span>
+        ${actionButton}
+      </div>
+    `;
+
+    container.insertBefore(card, container.firstChild);
+    
+    // Animate entries
+    setTimeout(() => {
+      card.className = card.className.replace("translate-y-4 opacity-0", "translate-y-0 opacity-100");
+    }, 50);
+  });
+
+  window.addEventListener('sse:donation_claimed', function(e) {
+    const data = e.detail;
+    console.log("NGO Dashboard: Donation claimed:", data);
+    
+    // If someone else claimed it, remove the card from the feed
+    const card = document.getElementById(`donation-card-${data.donation_id}`);
+    if (card) {
+      card.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => card.remove(), 300);
+    }
+  });
+
+  // Helper to extract CSRF token for dynamic form creations
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock %}
