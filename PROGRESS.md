@@ -42,10 +42,11 @@
 - [x] Browse available food (sorted by time, urgency-highlighted)
 - [x] Claim donation (concurrency-safe lock)
 - [x] Donor contact reveal + "Call Now" button
-- [ ] Confirm collection (sets collected_at)
-- [ ] Post-collection quality survey (Yes/No)
+- [x] Confirm collection (sets collected_at)
+- [x] Post-collection quality survey (Yes/No)
 - [x] Requests table created (future UI flagged)
-- [ ] Events: donation_claimed, donation_collected
+- [x] Events: donation_claimed, donation_collected
+
 
 
 ## Core logic
@@ -53,17 +54,19 @@
 - [x] Concurrency: select_for_update / atomic conditional update
 - [ ] Concurrency test: simultaneous claims → exactly one wins
 - [x] Expired items flagged + excluded from claimable list
-- [ ] Impact points awarded on collection
+- [x] Impact points awarded on collection
+
 
 
 ## Analytics / impact
 - [ ] Total servings/KG saved
 - [ ] Per-user Social Impact Score
 - [ ] Charts on report page
-- [ ] Leaderboard on landing/home
+- [x] Leaderboard on landing/home
+
 
 ## Screens
-- [ ] Landing + leaderboard
+- [x] Landing + leaderboard
 - [x] Auth screens
 - [x] Donor dashboard
 - [x] NGO dashboard

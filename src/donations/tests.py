@@ -7,21 +7,24 @@ from django.core.exceptions import PermissionDenied
 from unittest.mock import Mock
 
 from accounts.models import UserRole
-from donations.models import Donation, DonationStatus
+from donations.models import Donation, DonationStatus, QualityFeedback
 from donations.forms import DonationPostForm
 from donations import services as donations_services
-from events.signals import donation_posted, donation_claimed
+from events.signals import donation_posted, donation_claimed, donation_collected
 
 User = get_user_model()
 
 class DonationsWorkflowTests(TestCase):
     def setUp(self):
-        # Setup signals spy
+        # Setup signals spies
         self.posted_spy = Mock()
         donation_posted.connect(self.posted_spy)
 
         self.claimed_spy = Mock()
         donation_claimed.connect(self.claimed_spy)
+
+        self.collected_spy = Mock()
+        donation_collected.connect(self.collected_spy)
 
         # Create test users
         self.donor = User.objects.create_user(
@@ -201,3 +204,71 @@ class DonationsWorkflowTests(TestCase):
         """
         with self.assertRaises(PermissionDenied):
             donations_services.claim_donation(self.donation.id, self.banned_ngo)
+
+    def test_confirm_collection_success_awards_points_and_fires_signal(self):
+        """
+        Verify that confirming collection sets status to Collected and updates donor impact score.
+        """
+        # First claim the food
+        claimed = donations_services.claim_donation(self.donation.id, self.ngo)
+        
+        # Act
+        collected = donations_services.confirm_collection(claimed.id, self.ngo)
+        
+        # Assert
+        self.assertEqual(collected.status, DonationStatus.COLLECTED)
+        self.assertIsNotNone(collected.collected_at)
+        
+        # Verify signal fired
+        self.assertEqual(self.collected_spy.call_count, 1)
+        self.assertEqual(self.collected_spy.call_args[1]['donation'], collected)
+
+        # Verify impact score updated: '20 servings' -> awards 20 points
+        # Initial score was 50, now should be 70
+        self.donor.refresh_from_db()
+        self.assertEqual(self.donor.impact_score, 70)
+
+    def test_confirm_collection_unclaimed_fails(self):
+        """
+        Verify that confirming collection on an available (unclaimed) item fails.
+        """
+        with self.assertRaises(ValueError):
+            donations_services.confirm_collection(self.donation.id, self.ngo)
+
+    def test_confirm_collection_wrong_ngo_fails(self):
+        """
+        Verify that an NGO cannot confirm collection on an item claimed by a different NGO.
+        """
+        claimed = donations_services.claim_donation(self.donation.id, self.ngo)
+        
+        other_ngo = User.objects.create_user(
+            username='otherngo',
+            password='d0n0r_P@ssw0rd_987',
+            role=UserRole.NGO.value,
+            is_verified=True
+        )
+        with self.assertRaises(PermissionDenied):
+            donations_services.confirm_collection(claimed.id, other_ngo)
+
+    def test_quality_feedback_submission_success(self):
+        """
+        Verify that feedback can be submitted successfully on collected food.
+        """
+        # Setup collected donation
+        claimed = donations_services.claim_donation(self.donation.id, self.ngo)
+        collected = donations_services.confirm_collection(claimed.id, self.ngo)
+        
+        # Submit feedback
+        feedback = donations_services.record_quality_feedback(collected.id, self.ngo, acceptable=True)
+        
+        # Check DB
+        self.assertEqual(QualityFeedback.objects.count(), 1)
+        self.assertTrue(feedback.acceptable)
+        self.assertEqual(feedback.donation, collected)
+
+    def test_quality_feedback_fails_if_not_collected(self):
+        """
+        Verify that feedback submissions on active/unclaimed items fails with ValueError.
+        """
+        with self.assertRaises(ValueError):
+            donations_services.record_quality_feedback(self.donation.id, self.ngo, acceptable=True)

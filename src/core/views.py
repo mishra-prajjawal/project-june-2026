@@ -9,7 +9,32 @@ def home(request):
     """
     Renders the public landing page with donor leaderboard and basic impact stats.
     """
-    return render(request, 'core/home.html')
+    # 1. Fetch top donors ranked by impact score, resolved by creation date for tie-breaks
+    leaderboard = User.objects.filter(
+        role=UserRole.DONOR,
+        impact_score__gt=0
+    ).order_by('-impact_score', 'created_at')[:10]
+
+    # 2. Compute aggregate metrics
+    total_users_count = User.objects.exclude(role=UserRole.ADMIN).count()
+    
+    collected_donations = Donation.objects.filter(status=DonationStatus.COLLECTED)
+    total_servings = 0
+    for d in collected_donations:
+        match = re.search(r'\d+', d.quantity)
+        if match:
+            total_servings += int(match.group())
+        else:
+            total_servings += 10 # Default fallback
+
+    context = {
+        'leaderboard': leaderboard,
+        'metrics': {
+            'total_servings': total_servings,
+            'active_rescuers': total_users_count,
+        }
+    }
+    return render(request, 'core/home.html', context)
 
 @login_required
 def admin_panel(request):

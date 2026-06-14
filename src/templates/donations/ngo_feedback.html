@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Quality Check - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto my-12 px-4">
+  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl flex flex-col gap-6 text-center">
+    
+    <!-- Header -->
+    <div>
+      <span class="text-4xl">🔬</span>
+      <h2 class="text-3xl font-extrabold text-gray-900 mt-2">Quality Check</h2>
+      <p class="text-xs text-gray-500 mt-1">Please help us verify the safety of this rescued food.</p>
+    </div>
+
+    <!-- Food Summary Card -->
+    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col gap-1 text-sm">
+      <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Food Rescued</div>
+      <h4 class="font-extrabold text-gray-900 text-base mt-0.5">{{ donation.food_item }}</h4>
+      <p class="text-xs text-gray-500">Listed by {{ donation.donor.username }} &bull; Quantity: {{ donation.quantity }}</p>
+    </div>
+
+    <!-- 1-Question Form -->
+    <form method="post" action="{% url 'donations:submit_feedback' donation.id %}" class="flex flex-col gap-4">
+      {% csrf_token %}
+      
+      <p class="text-sm font-bold text-gray-800">Was the food quality acceptable and fresh?</p>
+
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Yes Option -->
+        <button type="submit" name="acceptable" value="yes" 
+                class="py-4 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-2xl shadow hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200 text-sm flex flex-col items-center gap-1">
+          <span class="text-2xl">✓</span>
+          <span>Yes, Acceptable</span>
+        </button>
+
+        <!-- No Option -->
+        <button type="submit" name="acceptable" value="no" 
+                class="py-4 bg-brand-orange hover:bg-brand-orange-accent text-white font-bold rounded-2xl shadow hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200 text-sm flex flex-col items-center gap-1">
+          <span class="text-2xl">⚠</span>
+          <span>No, Had Issues</span>
+        </button>
+      </div>
+
+    </form>
+
+    <div class="text-center text-[10px] text-gray-400 border-t border-gray-100 pt-4">
+      Your response updates the Donor's Social Impact Score and ranking.
+    </div>
+
+  </div>
+</section>
+{% endblock %}

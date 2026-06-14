@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
@@ -126,3 +126,42 @@ def claim_donation_view(request, donation_id):
             messages.error(request, str(e))
 
     return redirect('donations:ngo_dashboard')
+
+@login_required
+def collect_donation_view(request, donation_id):
+    """
+    POST endpoint to confirm collection/pickup of food by NGO.
+    """
+    if request.user.role != UserRole.NGO:
+        raise PermissionDenied("Only NGOs can confirm collections.")
+
+    if request.method == 'POST':
+        try:
+            donations_services.confirm_collection(donation_id, request.user)
+            messages.success(request, "Collection confirmed! Please complete this brief quality check.")
+            return redirect('donations:submit_feedback', donation_id=donation_id)
+        except (ValueError, PermissionDenied) as e:
+            messages.error(request, str(e))
+
+    return redirect('donations:ngo_dashboard')
+
+@login_required
+def submit_feedback_view(request, donation_id):
+    """
+    GET/POST view to submit one-question quality survey feedback after pickup.
+    """
+    if request.user.role != UserRole.NGO:
+        raise PermissionDenied("Only NGOs can submit food quality feedback.")
+
+    donation = get_object_or_404(Donation, pk=donation_id)
+    if donation.status != DonationStatus.COLLECTED or donation.claimed_by != request.user:
+        messages.error(request, "You can only submit feedback for food items you successfully collected.")
+        return redirect('donations:ngo_dashboard')
+
+    if request.method == 'POST':
+        acceptable = request.POST.get('acceptable') == 'yes'
+        donations_services.record_quality_feedback(donation_id, request.user, acceptable)
+        messages.success(request, "Thank you for the quality check! Your feedback is logged.")
+        return redirect('donations:ngo_dashboard')
+
+    return render(request, 'donations/ngo_feedback.html', {'donation': donation})

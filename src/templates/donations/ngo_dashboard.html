@@ -155,7 +155,7 @@
                 </a>
                 
                 <!-- Confirm Collection Form -->
-                <form action="#" method="post" class="flex-grow inline">
+                <form action="{% url 'donations:collect_donation' claim.id %}" method="post" class="flex-grow inline">
                   {% csrf_token %}
                   <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-xs shadow transition">
                     Confirm Pickup
@@ -212,7 +212,7 @@
                       {% endif %}
                     {% else %}
                       <!-- Direct to survey if empty -->
-                      <a href="#" class="px-2.5 py-1 bg-brand-green-light text-brand-green-dark border border-brand-green/20 font-bold rounded-lg text-xs hover:bg-brand-green/10 transition">
+                      <a href="{% url 'donations:submit_feedback' h.id %}" class="px-2.5 py-1 bg-brand-green-light text-brand-green-dark border border-brand-green/20 font-bold rounded-lg text-xs hover:bg-brand-green/10 transition">
                         Submit Survey
                       </a>
                     {% endif %}

@@ -90,40 +90,33 @@
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-100" id="leaderboard-body">
-            <!-- Will be populated dynamically. Providing standard seed placeholders for visual mockup. -->
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-800 text-xs">1</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 flex items-center gap-2">
-                Gourmet Caterers
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
-                740 pts
-              </td>
-            </tr>
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-800 text-xs">2</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                Grand Plaza Event Hall
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
-                520 pts
-              </td>
-            </tr>
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
-                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-800 text-xs">3</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                Bakehouse Cafe
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
-                390 pts
-              </td>
-            </tr>
+            {% if leaderboard %}
+              {% for donor in leaderboard %}
+                <tr class="hover:bg-slate-50/50 transition">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full 
+                      {% if forloop.counter == 1 %}bg-yellow-100 text-yellow-800
+                      {% elif forloop.counter == 2 %}bg-gray-100 text-gray-800
+                      {% elif forloop.counter == 3 %}bg-orange-100 text-orange-800
+                      {% else %}bg-slate-100 text-slate-700{% endif %} text-xs">
+                      {{ forloop.counter }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {{ donor.username }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
+                    {{ donor.impact_score }} pts
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="3" class="px-6 py-10 text-center text-sm text-gray-400">
+                  No donor impact logged yet. Be the first to rescue food!
+                </td>
+              </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -136,7 +129,7 @@
       <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col gap-2">
         <span class="text-4xl">🌱</span>
         <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mt-2">Servings Rescued</h3>
-        <p class="text-4xl font-extrabold text-gray-900" id="stat-servings">1,450+</p>
+        <p class="text-4xl font-extrabold text-gray-900" id="stat-servings">{{ metrics.total_servings }}</p>
         <p class="text-xs text-gray-500">Cooked meals directed to local shelters instead of landfills.</p>
       </div>
 
@@ -144,7 +137,7 @@
       <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col gap-2">
         <span class="text-4xl">🤝</span>
         <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mt-2">Active Rescuers</h3>
-        <p class="text-4xl font-extrabold text-gray-900" id="stat-users">32</p>
+        <p class="text-4xl font-extrabold text-gray-900" id="stat-users">{{ metrics.active_rescuers }}</p>
         <p class="text-xs text-gray-500">Local restaurants, caterers, and volunteer organizations.</p>
       </div>
 
@@ -175,8 +168,9 @@
 <!-- Listen for live updates and refresh leaderboard/statistics -->
 <script>
   window.addEventListener('sse:donation_collected', function(e) {
-    console.log("Live collection event received on home page! Reloading leaderboard info...", e.detail);
-    // Real updates will be bound dynamically in Phase 1 / Slice 5.
+    console.log("Live collection event received on home page! Reloading statistics...", e.detail);
+    // Reload the page to reflect new leaderboard rankings and counts
+    setTimeout(() => window.location.reload(), 1500);
   });
 </script>
 {% endblock %}
