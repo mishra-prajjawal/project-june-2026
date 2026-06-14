@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Post Food Donation - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-lg mx-auto my-10 px-4">
+  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg flex flex-col gap-6 relative">
+    
+    <!-- Title -->
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900">List Surplus Food</h2>
+      <p class="text-xs text-gray-500 mt-1">Complete these 3 simple steps to coordinate a pickup.</p>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="flex items-center justify-between px-6 border-b border-gray-100 pb-5">
+      <div class="flex flex-col items-center gap-1">
+        <span id="step-indicator-1" class="w-8 h-8 rounded-full bg-brand-green text-white font-bold text-sm flex items-center justify-center shadow">1</span>
+        <span class="text-[10px] font-bold text-brand-green uppercase tracking-wider">Details</span>
+      </div>
+      <div class="flex-grow h-0.5 bg-gray-100 mx-2 -mt-5" id="progress-line-1"></div>
+      <div class="flex flex-col items-center gap-1">
+        <span id="step-indicator-2" class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 font-bold text-sm flex items-center justify-center">2</span>
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Expiry</span>
+      </div>
+      <div class="flex-grow h-0.5 bg-gray-100 mx-2 -mt-5" id="progress-line-2"></div>
+      <div class="flex flex-col items-center gap-1">
+        <span id="step-indicator-3" class="w-8 h-8 rounded-full bg-gray-100 text-gray-400 font-bold text-sm flex items-center justify-center">3</span>
+        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Location</span>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="donation-form" method="post" enctype="multipart/form-data" action="{% url 'donations:post_donation' %}" class="flex flex-col gap-5">
+      {% csrf_token %}
+      
+      <!-- Hidden Geolocation Fields -->
+      {{ form.latitude }}
+      {{ form.longitude }}
+
+      <!-- Step 1: Details -->
+      <div id="step-1" class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="id_food_item" class="text-xs font-bold text-gray-700 uppercase tracking-wider">What food are you donating?</label>
+          {{ form.food_item }}
+          {% if form.food_item.errors %}
+            <p class="text-xs text-brand-orange font-bold">{{ form.food_item.errors.0 }}</p>
+          {% endif %}
+          <p class="text-[10px] text-gray-400">Specify dishes clearly (e.g. "20 packets of Veg Biryani").</p>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="id_quantity" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Quantity / Servings</label>
+          {{ form.quantity }}
+          {% if form.quantity.errors %}
+            <p class="text-xs text-brand-orange font-bold">{{ form.quantity.errors.0 }}</p>
+          {% endif %}
+          <p class="text-[10px] text-gray-400">e.g. "30 portions", "5 kg", "2 trays".</p>
+        </div>
+      </div>
+
+      <!-- Step 2: Time & Photo -->
+      <div id="step-2" class="hidden flex flex-col gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label for="id_expiry_time" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Best Before / Expiry Time</label>
+          {{ form.expiry_time }}
+          {% if form.expiry_time.errors %}
+            <p class="text-xs text-brand-orange font-bold">{{ form.expiry_time.errors.0 }}</p>
+          {% endif %}
+          <p class="text-[10px] text-gray-400">Rescuers must claim and pick up this food before this time.</p>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="id_image" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Upload Photo (Optional)</label>
+          {{ form.image }}
+          {% if form.image.errors %}
+            <p class="text-xs text-brand-orange font-bold">{{ form.image.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Step 3: Location -->
+      <div id="step-3" class="hidden flex flex-col gap-4">
+        
+        <!-- Geolocation Pre-fill Alert -->
+        <div class="flex flex-col gap-2 p-3 bg-brand-green-light border border-brand-green/20 text-brand-green-dark rounded-xl" id="geo-status-banner">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">📍</span>
+            <span class="text-xs font-bold" id="geo-status-title">Detecting location...</span>
+          </div>
+          <p class="text-[10px] text-brand-green-dark/70" id="geo-status-desc">We are querying coordinates to help speed up NGO coordination.</p>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label for="id_address" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Pickup Address</label>
+          {{ form.address }}
+          {% if form.address.errors %}
+            <p class="text-xs text-brand-orange font-bold">{{ form.address.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Navigation buttons -->
+      <div class="flex items-center gap-3 border-t border-gray-100 pt-5 mt-2">
+        <button type="button" id="prev-btn" onclick="prevStep()" class="hidden px-5 py-3 border border-gray-300 text-sm font-semibold rounded-xl text-gray-700 bg-white hover:bg-gray-50 flex-grow transition">
+          Back
+        </button>
+        <button type="button" id="next-btn" onclick="nextStep()" class="px-5 py-3 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-sm flex-grow transition shadow-md shadow-brand-green/10">
+          Next
+        </button>
+      </div>
+
+    </form>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let currentStep = 1;
+
+  function updateWizardUI() {
+    const step1 = document.getElementById('step-1');
+    const step2 = document.getElementById('step-2');
+    const step3 = document.getElementById('step-3');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Indicators
+    const ind1 = document.getElementById('step-indicator-1');
+    const ind2 = document.getElementById('step-indicator-2');
+    const ind3 = document.getElementById('step-indicator-3');
+    
+    // Lines
+    const line1 = document.getElementById('progress-line-1');
+    const line2 = document.getElementById('progress-line-2');
+
+    // Reset visibility
+    step1.classList.add('hidden');
+    step2.classList.add('hidden');
+    step3.classList.add('hidden');
+
+    if (currentStep === 1) {
+      step1.classList.remove('hidden');
+      prevBtn.classList.add('hidden');
+      nextBtn.innerText = "Next";
+      
+      ind2.className = ind2.className.replace('bg-brand-green text-white', 'bg-gray-100 text-gray-400');
+      ind2.className = ind2.className.replace('shadow', '');
+      line1.className = line1.className.replace('bg-brand-green', 'bg-gray-100');
+    } else if (currentStep === 2) {
+      step2.classList.remove('hidden');
+      prevBtn.classList.remove('hidden');
+      nextBtn.innerText = "Next";
+      
+      ind2.className = ind2.className.replace('bg-gray-100 text-gray-400', 'bg-brand-green text-white shadow');
+      ind3.className = ind3.className.replace('bg-brand-green text-white', 'bg-gray-100 text-gray-400');
+      ind3.className = ind3.className.replace('shadow', '');
+      line1.className = line1.className.replace('bg-gray-100', 'bg-brand-green');
+      line2.className = line2.className.replace('bg-brand-green', 'bg-gray-100');
+    } else if (currentStep === 3) {
+      step3.classList.remove('hidden');
+      prevBtn.classList.remove('hidden');
+      nextBtn.innerText = "Post Listing";
+      
+      ind3.className = ind3.className.replace('bg-gray-100 text-gray-400', 'bg-brand-green text-white shadow');
+      line2.className = line2.className.replace('bg-gray-100', 'bg-brand-green');
+
+      // Request Geolocation when arriving at step 3 if not already detected
+      requestGeolocation();
+    }
+  }
+
+  function nextStep() {
+    // Basic step validation before moving forward
+    if (currentStep === 1) {
+      const foodItem = document.getElementById('id_food_item').value.trim();
+      const quantity = document.getElementById('id_quantity').value.trim();
+      if (!foodItem || !quantity) {
+        alert('Please fill out the food name and quantity.');
+        return;
+      }
+      currentStep = 2;
+    } else if (currentStep === 2) {
+      const expiryTime = document.getElementById('id_expiry_time').value;
+      if (!expiryTime) {
+        alert('Please specify an expiry/best-before time.');
+        return;
+      }
+      currentStep = 3;
+    } else if (currentStep === 3) {
+      // Validate address
+      const address = document.getElementById('id_address').value.trim();
+      if (!address) {
+        alert('Please provide a pickup address.');
+        return;
+      }
+      // Submit the form
+      document.getElementById('donation-form').submit();
+    }
+    updateWizardUI();
+  }
+
+  function prevStep() {
+    if (currentStep > 1) {
+      currentStep--;
+    }
+    updateWizardUI();
+  }
+
+  // Geolocation Prefill script
+  function requestGeolocation() {
+    const banner = document.getElementById('geo-status-banner');
+    const title = document.getElementById('geo-status-title');
+    const desc = document.getElementById('geo-status-desc');
+    const latInput = document.getElementById('id_latitude');
+    const lngInput = document.getElementById('id_longitude');
+    const addressArea = document.getElementById('id_address');
+
+    if (!navigator.geolocation) {
+      title.innerText = "Location access unsupported";
+      desc.innerText = "Your browser does not support geolocation tracking. Please enter your address manually.";
+      banner.className = banner.className.replace('bg-brand-green-light border-brand-green/20 text-brand-green-dark', 'bg-brand-orange-light border-brand-orange/20 text-brand-orange-dark');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        
+        latInput.value = lat;
+        lngInput.value = lng;
+
+        title.innerText = "Location coordinates locked!";
+        desc.innerText = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}. coordinates attached to donation record.`;
+
+        // Pre-fill physical address if it's empty
+        if (!addressArea.value.trim()) {
+          addressArea.value = `Latitude: ${lat.toFixed(4)}, Longitude: ${lng.toFixed(4)} (Coordinated Area)`;
+        }
+      },
+      (error) => {
+        console.warn("Geolocation access denied or timed out:", error);
+        title.innerText = "Location query failed";
+        desc.innerText = "We couldn't retrieve your coordinates. You can type in the pickup address details manually.";
+        banner.className = banner.className.replace('bg-brand-green-light border-brand-green/20 text-brand-green-dark', 'bg-brand-orange-light border-brand-orange/20 text-brand-orange-dark');
+      },
+      { timeout: 6000 }
+    );
+  }
+</script>
+{% endblock %}

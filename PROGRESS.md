@@ -27,14 +27,15 @@
 
 
 ## Donor module
-- [ ] Registration (name/address/phone)
-- [ ] Post donation (food, quantity, expiry, address, image)
-- [ ] Geolocation prefill of address
-- [ ] Track status (Available → Claimed → Collected)
-- [ ] Donation history
-- [ ] Impact score + leaderboard rank visible
-- [ ] Event: donation_posted + live feed push
-- [ ] Animated green ✓ "Thank You" confirmation
+- [x] Registration (name/address/phone)
+- [x] Post donation (food, quantity, expiry, address, image)
+- [x] Geolocation prefill of address
+- [x] Track status (Available → Claimed → Collected)
+- [x] Donation history
+- [x] Impact score + leaderboard rank visible
+- [x] Event: donation_posted + live feed push
+- [x] Animated green ✓ "Thank You" confirmation
+
 
 ## NGO / Volunteer module
 - [ ] Registration + document upload (awaits verification)
@@ -62,7 +63,7 @@
 ## Screens
 - [ ] Landing + leaderboard
 - [x] Auth screens
-- [ ] Donor dashboard
+- [x] Donor dashboard
 - [ ] NGO dashboard
 - [x] Admin panel
 - [ ] Analytics/impact report

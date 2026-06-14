@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Donor Dashboard - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
+  
+  <!-- Donor Header & Actions -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Donor Dashboard</h1>
+      <p class="text-sm text-gray-500 mt-1">Manage food listings, track claims, and see your social impact.</p>
+    </div>
+    <a href="{% url 'donations:post_donation' %}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-brand-green hover:bg-brand-green-accent rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+      ➕ Post New Donation
+    </a>
+  </div>
+
+  <!-- Gamification / Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <!-- Stat 1: Impact Score -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-brand-green-light rounded-xl">🌟</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Social Impact Score</h3>
+        <p class="text-3xl font-extrabold text-brand-green mt-0.5" id="impact-score">{{ user.impact_score }} pts</p>
+      </div>
+    </div>
+    
+    <!-- Stat 2: Leaderboard Rank -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-yellow-50 rounded-xl">👑</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Leaderboard Rank</h3>
+        <p class="text-3xl font-extrabold text-gray-900 mt-0.5" id="leaderboard-rank">#{{ leaderboard_rank }}</p>
+      </div>
+    </div>
+
+    <!-- Stat 3: Total Rescued Listings -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-blue-50 rounded-xl">🥗</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Collected Listings</h3>
+        <p class="text-3xl font-extrabold text-gray-900 mt-0.5">{{ past_donations|length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Listings Section -->
+  <div class="bg-white p-6 sm:p-8 border border-gray-100 rounded-3xl shadow-sm flex flex-col gap-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900">Active Listings</h2>
+      <p class="text-xs text-gray-500 mt-0.5">Track your food items from posting to claim and confirmation.</p>
+    </div>
+
+    {% if active_donations %}
+      <div class="overflow-x-auto rounded-2xl border border-gray-100">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Food Item</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Expires At</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Claimed By</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100" id="active-donations-body">
+            {% for donation in active_donations %}
+              <tr id="donation-row-{{ donation.id }}" class="transition duration-150">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 flex items-center gap-3">
+                  {% if donation.image %}
+                    <img src="{{ donation.image.url }}" class="w-10 h-10 object-cover rounded-lg" alt="{{ donation.food_item }}">
+                  {% else %}
+                    <div class="w-10 h-10 bg-gray-50 text-base flex items-center justify-center rounded-lg border border-gray-100">🍲</div>
+                  {% endif %}
+                  {{ donation.food_item }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ donation.quantity }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ donation.expiry_time|date:"SHORT_DATETIME_FORMAT" }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm" id="status-badge-{{ donation.id }}">
+                  {% if donation.status == 'Claimed' %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-orange-light text-brand-orange-dark border border-brand-orange/10 glow-urgent">
+                      Claimed
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-green-light text-brand-green-dark border border-brand-green/10">
+                      Available
+                    </span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="claimed-by-{{ donation.id }}">
+                  {% if donation.claimed_by %}
+                    <div class="font-semibold text-gray-900">{{ donation.claimed_by.username }}</div>
+                    <div class="text-xs text-gray-400">Call NGO: {{ donation.claimed_by.contact_info }}</div>
+                  {% else %}
+                    <span class="text-gray-400">Awaiting NGO...</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-10 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-100 rounded-3xl">
+        <span class="text-3xl">🥡</span>
+        <h4 class="font-bold text-gray-700">No Active Food Listings</h4>
+        <p class="text-xs text-gray-400">Use the button above to post surplus cooked food.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Past History Section -->
+  <div class="bg-white p-6 sm:p-8 border border-gray-100 rounded-3xl shadow-sm flex flex-col gap-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-900">Donation History</h2>
+      <p class="text-xs text-gray-500 mt-0.5">Summary of food rescued and quality feedback surveys.</p>
+    </div>
+
+    {% if past_donations %}
+      <div class="overflow-x-auto rounded-2xl border border-gray-100">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Food Item</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Collected At</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rescued By</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Acceptable Quality</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            {% for donation in past_donations %}
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  {{ donation.food_item }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ donation.quantity }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ donation.collected_at|date:"SHORT_DATETIME_FORMAT" }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                  {{ donation.claimed_by.username }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  {% if donation.quality_feedback %}
+                    {% if donation.quality_feedback.acceptable %}
+                      <span class="text-brand-green font-bold flex items-center gap-1">✓ Yes</span>
+                    {% else %}
+                      <span class="text-brand-orange font-bold flex items-center gap-1">⚠ Issue reported</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-gray-400">Awaiting feedback</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-8 text-sm text-gray-400">
+        Rescued listings will appear here after they are claimed and collected.
+      </div>
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Listen for real-time SSE updates and patch the dashboard DOM
+  window.addEventListener('sse:donation_claimed', function(e) {
+    const data = e.detail;
+    console.log("Donor Dashboard: SSE claim notification received", data);
+    
+    // Find the row representing this donation
+    const row = document.getElementById(`donation-row-${data.donation_id}`);
+    if (row) {
+      // 1. Update status badge
+      const badgeContainer = document.getElementById(`status-badge-${data.donation_id}`);
+      if (badgeContainer) {
+        badgeContainer.innerHTML = `
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-orange-light text-brand-orange-dark border border-brand-orange/10 glow-urgent">
+            Claimed
+          </span>
+        `;
+      }
+      
+      // 2. Reveal NGO contact info
+      const claimedContainer = document.getElementById(`claimed-by-${data.donation_id}`);
+      if (claimedContainer) {
+        claimedContainer.innerHTML = `
+          <div class="font-semibold text-gray-900">${data.claimed_by}</div>
+          <div class="text-xs text-gray-400">Call NGO: ${data.contact_info}</div>
+        `;
+      }
+
+      // Highlight the updated row briefly
+      row.classList.add('bg-brand-orange-light/35');
+      setTimeout(() => row.classList.remove('bg-brand-orange-light/35'), 2000);
+    }
+  });
+
+  window.addEventListener('sse:donation_collected', function(e) {
+    const data = e.detail;
+    console.log("Donor Dashboard: SSE collection notification received", data);
+    
+    // If the collection pertains to this donor, update the stats and reload page after a short delay
+    if (data.donor_id == "{{ user.id }}") {
+      const scoreEl = document.getElementById('impact-score');
+      if (scoreEl) {
+        scoreEl.innerText = `${data.donor_impact_score} pts`;
+        scoreEl.classList.add('scale-105', 'text-brand-green-dark');
+        setTimeout(() => scoreEl.classList.remove('scale-105', 'text-brand-green-dark'), 1500);
+      }
+      
+      // Reload page to move active row to past history correctly
+      setTimeout(() => window.location.reload(), 1500);
+    }
+  });
+</script>
+{% endblock %}
