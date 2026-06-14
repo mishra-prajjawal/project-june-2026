@@ -12,9 +12,10 @@
 
 
 ## Auth & roles
-- [ ] Register (role-aware), login, logout
-- [ ] Password hashing PBKDF2/Argon2 (NOT MD5)
-- [ ] NGO starts unverified; banned flag respected
+- [x] Register (role-aware), login, logout
+- [x] Password hashing PBKDF2/Argon2 (NOT MD5)
+- [x] NGO starts unverified; banned flag respected
+
 
 ## Admin module
 - [ ] Secure admin login
@@ -59,7 +60,7 @@
 
 ## Screens
 - [ ] Landing + leaderboard
-- [ ] Auth screens
+- [x] Auth screens
 - [ ] Donor dashboard
 - [ ] NGO dashboard
 - [ ] Admin panel

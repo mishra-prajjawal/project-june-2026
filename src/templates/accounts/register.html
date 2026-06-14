@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-lg mx-auto my-12 px-4">
+  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg flex flex-col gap-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900">Create your Account</h2>
+      <p class="text-xs text-gray-500 mt-1">Join FoodConnect to rescue food or receive donations.</p>
+    </div>
+
+    <!-- Error Summary -->
+    {% if form.non_field_errors %}
+      <div class="p-3.5 bg-brand-orange-light border border-brand-orange/20 text-brand-orange-dark rounded-xl text-xs flex flex-col gap-1">
+        {% for error in form.non_field_errors %}
+          <span>{{ error }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" action="{% url 'accounts:register' %}" class="flex flex-col gap-4">
+      {% csrf_token %}
+
+      <!-- Loop over visible form fields except password fields and document upload -->
+      {% for field in form %}
+        {% if field.name == 'verification_document' %}
+          <!-- Verification Doc Wrapper (Toggled by JS) -->
+          <div id="doc-upload-wrapper" class="hidden flex flex-col gap-1.5 border border-brand-green/10 bg-brand-green/5 p-4 rounded-xl">
+            <label for="{{ field.id_for_label }}" class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center justify-between">
+              <span>{{ field.label }}</span>
+              <span class="text-[10px] bg-brand-green text-white font-bold px-1.5 py-0.5 rounded">Required for NGOs</span>
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="text-xs text-brand-orange font-bold mt-1">{{ field.errors.0 }}</p>
+            {% endif %}
+            <p class="text-[10px] text-gray-500 mt-1">Please upload a valid registration certificate or ID proving your NGO registration.</p>
+          </div>
+        {% else %}
+          <div class="flex flex-col gap-1.5">
+            <label for="{{ field.id_for_label }}" class="text-xs font-bold text-gray-700 uppercase tracking-wider">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="text-xs text-brand-orange font-bold mt-0.5">{{ field.errors.0 }}</p>
+            {% endif %}
+            {% if field.help_text %}
+              <p class="text-[10px] text-gray-400 mt-0.5">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      <button type="submit" 
+              class="w-full mt-2 py-3.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition duration-200">
+        Register Account
+      </button>
+    </form>
+
+    <div class="text-center text-xs text-gray-500 border-t border-gray-100 pt-4">
+      Already have an account? 
+      <a href="{% url 'login' %}" class="font-bold text-brand-green hover:underline">Sign in instead</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleDocumentUpload(roleValue) {
+    const docWrapper = document.getElementById('doc-upload-wrapper');
+    if (roleValue === 'NGO') {
+      docWrapper.classList.remove('hidden');
+    } else {
+      docWrapper.classList.add('hidden');
+      // Clear document input if switching back to Donor
+      const fileInput = docWrapper.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+    }
+  }
+
+  // Run on initial load to match pre-filled/default role selection
+  document.addEventListener("DOMContentLoaded", function() {
+    const roleSelect = document.getElementById('id_role');
+    if (roleSelect) {
+      toggleDocumentUpload(roleSelect.value);
+    }
+  });
+</script>
+{% endblock %}
