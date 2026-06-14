@@ -1,0 +1,11 @@
+Django>=5.0,<5.1
+django-environ>=0.11.0
+mysqlclient>=2.2.0
+psycopg2-binary>=2.9.9
+gunicorn>=21.2.0
+pytest>=8.0.0
+pytest-django>=4.8.0
+black>=24.2.0
+isort>=5.13.0
+Pillow>=10.2.0
+

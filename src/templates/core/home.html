@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}FoodConnect - Rescue Surplus Cooked Food{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-white overflow-hidden py-16 sm:py-24 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12">
+    
+    <!-- Hero Text -->
+    <div class="max-w-2xl text-center lg:text-left flex flex-col gap-6">
+      <span class="inline-flex items-center self-center lg:self-start px-3 py-1 text-xs font-semibold text-brand-green bg-brand-green-light rounded-full border border-brand-green/10">
+        Hyper-local &bull; Time-sensitive
+      </span>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">
+        Connect Surplus Food to <span class="text-brand-green">Local Causes</span>
+      </h1>
+      <p class="text-lg text-gray-600 sm:text-xl">
+        FoodConnect enables restaurants, caterers, and venues to quickly list surplus cooked food, getting it securely claimed and collected by verified NGOs before it spoils.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+        <a href="{% url 'login' %}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-brand-green hover:bg-brand-green-accent shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+          Get Started as Donor
+        </a>
+        <a href="{% url 'login' %}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+          Register NGO / Volunteer
+        </a>
+      </div>
+    </div>
+    
+    <!-- Hero Mockup or Asset Card -->
+    <div class="flex-grow max-w-md w-full">
+      <div class="bg-brand-green-light rounded-3xl p-8 border border-brand-green/10 shadow-lg relative overflow-hidden flex flex-col gap-6">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-brand-green/5 rounded-full blur-2xl"></div>
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-brand-green bg-white/80 px-2.5 py-1 rounded-md shadow-sm border border-brand-green/5">Active Feed</span>
+          <span class="text-xs text-brand-orange font-bold flex items-center gap-1 animate-pulse">
+            <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Live Updates
+          </span>
+        </div>
+        
+        <!-- Live Feed Card Mockup -->
+        <div class="flex flex-col gap-4">
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-green-light text-brand-green flex items-center justify-center font-bold text-lg">
+              🍲
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-gray-900">30 Servings of Fried Rice</h4>
+              <p class="text-xs text-gray-500">Posted by Gourmet Inn &bull; 1.2 km away</p>
+              <span class="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 bg-brand-orange-light text-brand-orange rounded">Expires in 2 hours</span>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-brand-green-light text-brand-green flex items-center justify-center font-bold text-lg">
+              🥪
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-gray-900">15 Veg Sandwiches</h4>
+              <p class="text-xs text-gray-500">Posted by Cafe Central &bull; 3.0 km away</p>
+              <span class="inline-block mt-2 text-[10px] font-bold px-2 py-0.5 bg-brand-green-light text-brand-green rounded">Available Now</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</section>
+
+<!-- Impact Metrics & Leaderboard Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+    
+    <!-- Left: Leaderboard -->
+    <div class="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm flex flex-col gap-6">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900">Top Donors Leaderboard</h2>
+        <p class="text-sm text-gray-500 mt-1">Our hero restaurants and organizations ranked by Social Impact Score.</p>
+      </div>
+      
+      <!-- Leaderboard list -->
+      <div class="overflow-hidden rounded-2xl border border-gray-100">
+        <table class="min-w-full divide-y divide-gray-100">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Rank</th>
+              <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Donor</th>
+              <th scope="col" class="px-6 py-3.5 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Impact Score</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-100" id="leaderboard-body">
+            <!-- Will be populated dynamically. Providing standard seed placeholders for visual mockup. -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-yellow-100 text-yellow-800 text-xs">1</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 flex items-center gap-2">
+                Gourmet Caterers
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
+                740 pts
+              </td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-gray-800 text-xs">2</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                Grand Plaza Event Hall
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
+                520 pts
+              </td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-extrabold text-gray-900">
+                <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-800 text-xs">3</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                Bakehouse Cafe
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-brand-green">
+                390 pts
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Right: Quick Stats & Impact Info -->
+    <div class="flex flex-col gap-6">
+      
+      <!-- Servings Stat -->
+      <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col gap-2">
+        <span class="text-4xl">🌱</span>
+        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mt-2">Servings Rescued</h3>
+        <p class="text-4xl font-extrabold text-gray-900" id="stat-servings">1,450+</p>
+        <p class="text-xs text-gray-500">Cooked meals directed to local shelters instead of landfills.</p>
+      </div>
+
+      <!-- Active Donors Count -->
+      <div class="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm flex flex-col gap-2">
+        <span class="text-4xl">🤝</span>
+        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mt-2">Active Rescuers</h3>
+        <p class="text-4xl font-extrabold text-gray-900" id="stat-users">32</p>
+        <p class="text-xs text-gray-500">Local restaurants, caterers, and volunteer organizations.</p>
+      </div>
+
+      <!-- Proximity Match Info -->
+      <div class="bg-brand-green/5 rounded-3xl p-6 border border-brand-green/10 flex flex-col gap-3">
+        <h4 class="font-bold text-brand-green-dark">How it works</h4>
+        <ul class="text-xs text-brand-green-dark/80 space-y-2">
+          <li class="flex items-start gap-2">
+            <span class="font-bold">1.</span>
+            <span>Donor posts surplus food with best-before times in under 30 seconds.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="font-bold">2.</span>
+            <span>SSE channel triggers notifications immediately to verified nearby NGOs.</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="font-bold">3.</span>
+            <span>NGO locks claim, collects the food, and coordinates pickup directly.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+    
+  </div>
+</section>
+
+<!-- Listen for live updates and refresh leaderboard/statistics -->
+<script>
+  window.addEventListener('sse:donation_collected', function(e) {
+    console.log("Live collection event received on home page! Reloading leaderboard info...", e.detail);
+    // Real updates will be bound dynamically in Phase 1 / Slice 5.
+  });
+</script>
+{% endblock %}

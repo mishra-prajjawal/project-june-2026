@@ -1,0 +1,26 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local database
+db.sqlite3
+db.sqlite3-journal
+
+# Local environment variables
+.env
+
+# Compiled static assets & media
+staticfiles/
+src/media/
+
+# Node dependencies
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo

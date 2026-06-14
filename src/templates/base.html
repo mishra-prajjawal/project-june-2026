@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-brand-slate">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FoodConnect - Hyper-Local Food Donation{% endblock %}</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Connect surplus food donors with verified local NGOs and shelters to rescue cooked food before it spoils.">
+  <meta name="author" content="Prajjawal Mishra">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind Output CSS -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="flex flex-col h-full text-brand-dark font-sans antialiased">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 w-full bg-white border-b border-gray-100 shadow-sm backdrop-blur-md bg-opacity-90">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <div class="flex items-center">
+          <a href="{% url 'core:home' %}" class="flex items-center gap-2 group">
+            <span class="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-green text-white font-extrabold text-xl shadow-md shadow-brand-green/20 group-hover:scale-105 transition-transform duration-200">
+              FC
+            </span>
+            <span class="font-extrabold text-xl tracking-tight text-brand-green group-hover:text-brand-green-dark transition-colors duration-200">
+              Food<span class="text-brand-dark">Connect</span>
+            </span>
+          </a>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <nav class="hidden md:flex items-center space-x-6">
+          <a href="{% url 'core:home' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">Home</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'login' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">Dashboard</a>
+          {% endif %}
+        </nav>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+          {% if user.is_authenticated %}
+            <div class="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+              <span class="w-2.5 h-2.5 rounded-full {% if user.role == 'Admin' %}bg-purple-500{% elif user.role == 'NGO' %}bg-blue-500{% else %}bg-brand-green{% endif %}"></span>
+              <span class="max-w-[120px] truncate">{{ user.username }}</span>
+              <span class="text-xs text-gray-400">({{ user.role }})</span>
+            </div>
+            <!-- Logout Form (POST for Django 5 security compatibility) -->
+            <form action="{% url 'logout' %}" method="post" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="text-sm font-semibold text-red-600 hover:text-red-700 transition">
+                Logout
+              </button>
+            </form>
+          {% else %}
+            <a href="{% url 'login' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">
+              Sign In
+            </a>
+            <a href="{% url 'login' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-accent rounded-xl shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+              Get Started
+            </a>
+          {% endif %}
+        </div>
+        
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow">
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        {% for message in messages %}
+          <div class="p-4 rounded-xl border {% if message.tags == 'success' %}bg-brand-green-light border-brand-green/20 text-brand-green-dark{% else %}bg-brand-orange-light border-brand-orange/20 text-brand-orange-dark{% endif %} shadow-sm flex items-center justify-between mb-2">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.remove()" class="text-xs font-bold uppercase tracking-wider opacity-60 hover:opacity-100 transition">Dismiss</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-brand-dark text-gray-400 py-12 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-green text-white font-extrabold text-md shadow-md">
+            FC
+          </span>
+          <span class="font-extrabold text-lg text-white tracking-tight">
+            Food<span class="text-gray-300">Connect</span>
+          </span>
+        </div>
+        <p class="text-sm text-center md:text-left">
+          &copy; 2026 FoodConnect. Open Source under Apache 2.0. Author: Prajjawal Mishra.
+        </p>
+        <div class="flex space-x-6 text-sm">
+          <a href="#" class="hover:text-white transition">Privacy Policy</a>
+          <a href="#" class="hover:text-white transition">Terms of Service</a>
+          <a href="#" class="hover:text-white transition">Contact Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Base JS for SSE connection and notifications -->
+  <script>
+    // Global SSE Handler for live updates
+    const sseUrl = "{% url 'events:sse_stream' %}";
+    let sseSource = null;
+
+    function connectSSE() {
+      if (sseSource) {
+        sseSource.close();
+      }
+
+      console.log("Connecting to FoodConnect SSE stream...");
+      sseSource = new EventSource(sseUrl);
+
+      sseSource.addEventListener('connected', function(e) {
+        console.log("SSE connected successfully!");
+      });
+
+      // Keepalive monitor
+      sseSource.onerror = function(err) {
+        console.warn("SSE connection error, retrying in 5s...", err);
+        sseSource.close();
+        setTimeout(connectSSE, 5000);
+      };
+
+      // Listen for custom events and dispatch to document listeners
+      const events = ['donation_posted', 'donation_claimed', 'donation_collected', 'ngo_verified', 'user_banned'];
+      events.forEach(eventName => {
+        sseSource.addEventListener(eventName, function(e) {
+          try {
+            const data = JSON.parse(e.data);
+            console.log(`SSE Event: ${eventName}`, data);
+            
+            // Dispatch custom window event so individual pages can listen for updates
+            const customEvent = new CustomEvent(`sse:${eventName}`, { detail: data });
+            window.dispatchEvent(customEvent);
+            
+            // Trigger toast notifications if relevant
+            showToastNotification(eventName, data);
+          } catch(err) {
+            console.error("Error parsing SSE data", err);
+          }
+        });
+      });
+    }
+
+    function showToastNotification(event, data) {
+      // Create and inject a toast banner dynamically
+      const container = document.getElementById('toast-container') || createToastContainer();
+      const toast = document.createElement('div');
+      toast.className = "flex items-center gap-3 p-4 bg-white rounded-xl shadow-lg border border-gray-100 max-w-sm transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto";
+      
+      let title = "Update";
+      let desc = "";
+      let iconColor = "bg-brand-green";
+
+      if (event === 'donation_posted') {
+        title = "New Donation Posted";
+        desc = `"${data.food_item}" is now available at ${data.address}`;
+        iconColor = "bg-brand-green";
+      } else if (event === 'donation_claimed') {
+        title = "Donation Claimed";
+        desc = `"${data.food_item}" has been claimed by ${data.claimed_by}`;
+        iconColor = "bg-brand-orange";
+      } else if (event === 'donation_collected') {
+        title = "Food Collected";
+        desc = `"${data.food_item}" was successfully collected!`;
+        iconColor = "bg-brand-green-dark";
+      }
+
+      toast.innerHTML = `
+        <div class="flex-shrink-0 w-3 h-3 rounded-full ${iconColor}"></div>
+        <div class="flex-grow">
+          <h4 class="text-xs font-bold text-gray-900">${title}</h4>
+          <p class="text-xs text-gray-500 line-clamp-2">${desc}</p>
+        </div>
+      `;
+
+      container.appendChild(toast);
+      
+      // Animate entry
+      setTimeout(() => {
+        toast.className = toast.className.replace("translate-y-2 opacity-0", "translate-y-0 opacity-100");
+      }, 50);
+
+      // Animate exit
+      setTimeout(() => {
+        toast.className = toast.className.replace("translate-y-0 opacity-100", "-translate-y-2 opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+    }
+
+    function createToastContainer() {
+      const container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = "fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none";
+      document.body.appendChild(container);
+      return container;
+    }
+
+    // Connect SSE on load
+    document.addEventListener("DOMContentLoaded", connectSSE);
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

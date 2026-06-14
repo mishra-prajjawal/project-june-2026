@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto my-12 px-4">
+  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg flex flex-col gap-6">
+    <div class="text-center">
+      <h2 class="text-3xl font-extrabold text-gray-900">Welcome Back</h2>
+      <p class="text-xs text-gray-500 mt-1">Sign in to list surplus food or claim donations.</p>
+    </div>
+
+    {% if form.errors %}
+      <div class="p-3.5 bg-brand-orange-light border border-brand-orange/20 text-brand-orange-dark rounded-xl text-xs">
+        Your username and password did not match. Please try again.
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}" class="flex flex-col gap-4">
+      {% csrf_token %}
+      
+      <!-- Username Field -->
+      <div class="flex flex-col gap-1.5">
+        <label for="id_username" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Username</label>
+        <input type="text" name="username" id="id_username" required
+               class="px-4 py-3 bg-brand-slate border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-green/45 focus:ring-1 focus:ring-brand-green/45 transition">
+      </div>
+
+      <!-- Password Field -->
+      <div class="flex flex-col gap-1.5">
+        <label for="id_password" class="text-xs font-bold text-gray-700 uppercase tracking-wider">Password</label>
+        <input type="password" name="password" id="id_password" required
+               class="px-4 py-3 bg-brand-slate border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-green/45 focus:ring-1 focus:ring-brand-green/45 transition">
+      </div>
+
+      <button type="submit" 
+              class="w-full py-3.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] transition duration-200">
+        Sign In
+      </button>
+    </form>
+
+    <div class="text-center text-xs text-gray-500 border-t border-gray-100 pt-4">
+      Don't have an account? 
+      <a href="#" class="font-bold text-brand-green hover:underline">Register now</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

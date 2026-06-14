@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Keyframe animation for the green animated checkmark */
+  @keyframes draw-check {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* Keyframe animation for the urgent near-expiry items */
+  @keyframes pulse-orange {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+    }
+  }
+
+  .animate-checkmark {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: draw-check 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .glow-urgent {
+    animation: pulse-orange 2s infinite;
+  }
+}

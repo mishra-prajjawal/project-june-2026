@@ -1,0 +1,16 @@
+{
+  "name": "foodconnect",
+  "version": "1.0.0",
+  "description": "Hyper-local food donation platform connecting donors and NGOs",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/static/css/input.css -o ./src/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./src/static/css/input.css -o ./src/static/css/output.css --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  },
+  "author": "Prajjawal Mishra",
+  "license": "Apache-2.0"
+}
