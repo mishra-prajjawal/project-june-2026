@@ -25,6 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy built app and CSS compiled from the builder stage
 COPY --from=frontend-builder /app/src/ ./src/
+COPY docs/ ./docs/
+
+# Collect static files for WhiteNoise production serving
+RUN python src/manage.py collectstatic --noinput
 
 # Expose server port
 EXPOSE 8000

@@ -13,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
+    DATABASE_URL=(str, "sqlite:///db.sqlite3"),
 )
 
 # Read .env file from the repository root (one level up from BASE_DIR)
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -76,6 +78,13 @@ WSGI_APPLICATION = "foodconnect.wsgi.application"
 DATABASES = {
     "default": env.db("DATABASE_URL")
 }
+
+# Ensure SQLite database path is absolute relative to BASE_DIR to support varying execution working directories
+if DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    import os
+    db_name = DATABASES["default"]["NAME"]
+    if not os.path.isabs(db_name):
+        DATABASES["default"]["NAME"] = str(BASE_DIR / db_name)
 
 # Custom User Model
 AUTH_USER_MODEL = "accounts.User"
