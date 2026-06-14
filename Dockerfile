@@ -39,4 +39,4 @@ ENV PORT=8000
 ENV DATABASE_URL="sqlite:///db.sqlite3"
 
 # Entrypoint script that runs migrations, seeds demo accounts, and boots Gunicorn
-CMD ["sh", "-c", "python src/manage.py migrate && python src/manage.py seed_data && gunicorn --bind 0.0.0.0:8000 --chdir src foodconnect.wsgi:application"]
+CMD ["sh", "-c", "python src/manage.py migrate && python src/manage.py seed_data && gunicorn --bind 0.0.0.0:8000 --worker-class gthread --threads 20 --chdir src foodconnect.wsgi:application"]
