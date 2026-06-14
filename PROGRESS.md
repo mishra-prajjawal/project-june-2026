@@ -18,12 +18,13 @@
 
 
 ## Admin module
-- [ ] Secure admin login
-- [ ] NGO verification queue (approve/reject from documents)
+- [x] Secure admin login
+- [x] NGO verification queue (approve/reject from documents)
 - [ ] Monitor all active + past donations
-- [ ] Manage/ban users
-- [ ] System metrics dashboard
-- [ ] Events: ngo_verified, user_banned
+- [x] Manage/ban users
+- [x] System metrics dashboard
+- [x] Events: ngo_verified, user_banned
+
 
 ## Donor module
 - [ ] Registration (name/address/phone)
@@ -63,7 +64,7 @@
 - [x] Auth screens
 - [ ] Donor dashboard
 - [ ] NGO dashboard
-- [ ] Admin panel
+- [x] Admin panel
 - [ ] Analytics/impact report
 - [ ] 404 / empty / error states
 

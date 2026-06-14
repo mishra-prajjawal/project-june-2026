@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin oversight - FoodConnect{% endblock %}
+
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+
+  <!-- Dashboard Title -->
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+    <div>
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Oversight Panel</h1>
+      <p class="text-sm text-gray-500 mt-1">Monitor system metrics, verify NGO registrations, and manage platform access.</p>
+    </div>
+    <span class="text-xs font-bold text-brand-green bg-brand-green-light px-3 py-1 rounded-full border border-brand-green/10">
+      System Administrator
+    </span>
+  </div>
+
+  <!-- Quick Metrics Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- Metric 1: Total Users -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-blue-50 rounded-xl">👥</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Users</h3>
+        <p class="text-2xl font-extrabold text-gray-900 mt-0.5">{{ metrics.total_users }}</p>
+      </div>
+    </div>
+    
+    <!-- Metric 2: Pending Verifications -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-brand-orange-light rounded-xl">📄</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending NGOs</h3>
+        <p class="text-2xl font-extrabold text-brand-orange mt-0.5">{{ metrics.pending_verifications }}</p>
+      </div>
+    </div>
+
+    <!-- Metric 3: Active Donations -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-brand-green-light rounded-xl">🍲</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Food</h3>
+        <p class="text-2xl font-extrabold text-brand-green mt-0.5">{{ metrics.active_donations }}</p>
+      </div>
+    </div>
+
+    <!-- Metric 4: Rescued Servings -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+      <span class="text-3xl p-3 bg-green-50 rounded-xl">🌱</span>
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Rescued Servings</h3>
+        <p class="text-2xl font-extrabold text-gray-900 mt-0.5">{{ metrics.total_servings }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="flex border-b border-gray-200" id="tabs">
+    <button onclick="switchTab('queue')" id="tab-queue" class="px-6 py-3 border-b-2 border-brand-green text-sm font-bold text-brand-green transition focus:outline-none">
+      NGO Verification Queue ({{ pending_ngos|length }})
+    </button>
+    <button onclick="switchTab('users')" id="tab-users" class="px-6 py-3 border-b-2 border-transparent text-sm font-semibold text-gray-500 hover:text-gray-700 transition focus:outline-none">
+      User Management Directory
+    </button>
+  </div>
+
+  <!-- Tab Contents -->
+  <div class="bg-white border border-gray-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+    
+    <!-- Tab 1: NGO Verification Queue -->
+    <div id="content-queue" class="flex flex-col gap-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900">Verification Requests</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Review credentials of incoming NGOs to authorize their claiming capabilities.</p>
+        </div>
+      </div>
+
+      {% if pending_ngos %}
+        <div class="overflow-x-auto rounded-2xl border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">NGO Name</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contact Info</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registration Document</th>
+                <th scope="col" class="px-6 py-3.5 class text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for ngo in pending_ngos %}
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {{ ngo.username }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ ngo.contact_info }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if ngo.verification_document %}
+                      <a href="{{ ngo.verification_document.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-brand-green font-bold hover:underline">
+                        📄 View Document
+                      </a>
+                    {% else %}
+                      <span class="text-gray-400">No doc uploaded</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center text-sm flex items-center justify-center gap-2">
+                    <!-- Approve Form -->
+                    <form action="{% url 'accounts:verify_ngo' ngo.id %}" method="post" class="inline">
+                      {% csrf_token %}
+                      <button type="submit" class="px-3.5 py-1.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-lg text-xs transition">
+                        Approve
+                      </button>
+                    </form>
+                    
+                    <!-- Reject Form -->
+                    <form action="{% url 'accounts:reject_ngo' ngo.id %}" method="post" class="inline">
+                      {% csrf_token %}
+                      <button type="submit" onclick="return confirm('Are you sure you want to reject this NGO? This will delete the account.')" class="px-3.5 py-1.5 bg-brand-orange hover:bg-brand-orange-accent text-white font-bold rounded-lg text-xs transition">
+                        Reject
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-10 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-100 rounded-3xl">
+          <span class="text-3xl">🎉</span>
+          <h4 class="font-bold text-gray-700">Verification Queue Empty</h4>
+          <p class="text-xs text-gray-400">All registered NGO profiles have been successfully verified.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Tab 2: User Directory & Banning -->
+    <div id="content-users" class="hidden flex flex-col gap-6">
+      
+      <!-- Search Filter Form -->
+      <form method="get" action="{% url 'core:admin_panel' %}" class="flex gap-2">
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by username, email, or contact..." 
+               class="flex-grow max-w-md px-4 py-2.5 bg-brand-slate border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-green/45 transition">
+        <button type="submit" class="px-5 py-2.5 bg-brand-green hover:bg-brand-green-accent text-white font-bold rounded-xl text-sm transition">
+          Search
+        </button>
+        {% if q %}
+          <a href="{% url 'core:admin_panel' %}" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm transition flex items-center justify-center">
+            Clear
+          </a>
+        {% endif %}
+      </form>
+
+      {% if users %}
+        <div class="overflow-x-auto rounded-2xl border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">User</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Role</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Verified Status</th>
+                <th scope="col" class="px-6 py-3.5 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Banned</th>
+                <th scope="col" class="px-6 py-3.5 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for u in users %}
+                <tr class="{% if u.is_banned %}bg-red-50/20{% endif %}">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-semibold text-gray-900">{{ u.username }}</div>
+                    <div class="text-xs text-gray-400">{{ u.email }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100">
+                      {{ u.role }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if u.is_verified %}
+                      <span class="text-brand-green font-bold flex items-center gap-1">✓ Verified</span>
+                    {% else %}
+                      <span class="text-brand-orange font-bold flex items-center gap-1">⚠ Unverified</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    {% if u.is_banned %}
+                      <span class="text-red-600 font-bold">Yes</span>
+                    {% else %}
+                      <span class="text-gray-400">No</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                    <form action="{% url 'accounts:toggle_ban' u.id %}" method="post" class="inline">
+                      {% csrf_token %}
+                      <button type="submit" class="px-3.5 py-1.5 font-bold rounded-lg text-xs transition 
+                        {% if u.is_banned %}bg-gray-100 hover:bg-gray-200 text-gray-800{% else %}bg-red-100 hover:bg-red-200 text-red-700{% endif %}">
+                        {% if u.is_banned %}Unban{% else %}Ban User{% endif %}
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="text-center py-10 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-100 rounded-3xl">
+          <span class="text-3xl">🔍</span>
+          <h4 class="font-bold text-gray-700">No Users Found</h4>
+          <p class="text-xs text-gray-400">Try adjusting your search criteria.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Tab Swapper logic
+  function switchTab(activeTab) {
+    const queueBtn = document.getElementById('tab-queue');
+    const usersBtn = document.getElementById('tab-users');
+    const queueContent = document.getElementById('content-queue');
+    const usersContent = document.getElementById('content-users');
+
+    if (activeTab === 'queue') {
+      queueBtn.className = queueBtn.className.replace('border-transparent text-gray-500 font-semibold', 'border-brand-green text-brand-green font-bold');
+      usersBtn.className = usersBtn.className.replace('border-brand-green text-brand-green font-bold', 'border-transparent text-gray-500 font-semibold');
+      queueContent.classList.remove('hidden');
+      usersContent.classList.add('hidden');
+    } else {
+      usersBtn.className = usersBtn.className.replace('border-transparent text-gray-500 font-semibold', 'border-brand-green text-brand-green font-bold');
+      queueBtn.className = queueBtn.className.replace('border-brand-green text-brand-green font-bold', 'border-transparent text-gray-500 font-semibold');
+      usersContent.classList.remove('hidden');
+      queueContent.classList.add('hidden');
+    }
+  }
+
+  // Preserve selected tab on search/refresh
+  document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('q')) {
+      switchTab('users');
+    }
+  });
+
+  // Dynamically catch SSE signals to notify admin of user and verification events
+  window.addEventListener('sse:ngo_verified', function(e) {
+    console.log("Live NGO verified event received:", e.detail);
+    // Refresh queue view if on verification queue
+  });
+</script>
+{% endblock %}
