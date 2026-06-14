@@ -46,6 +46,7 @@
             <a href="{% url 'dashboard' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">Dashboard</a>
             <a href="{% url 'analytics:report' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">Impact Reports</a>
           {% endif %}
+          <a href="{% url 'core:docs' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">Documentation & Demos</a>
         </nav>
         
         <!-- Action Buttons -->
@@ -67,7 +68,7 @@
             <a href="{% url 'login' %}" class="text-sm font-semibold text-gray-600 hover:text-brand-green transition">
               Sign In
             </a>
-            <a href="{% url 'login' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-accent rounded-xl shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+            <a href="{% url 'signup' %}" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-brand-green hover:bg-brand-green-accent rounded-xl shadow-sm hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
               Get Started
             </a>
           {% endif %}

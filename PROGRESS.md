@@ -20,7 +20,7 @@
 ## Admin module
 - [x] Secure admin login
 - [x] NGO verification queue (approve/reject from documents)
-- [ ] Monitor all active + past donations
+- [x] Monitor all active + past donations
 - [x] Manage/ban users
 - [x] System metrics dashboard
 - [x] Events: ngo_verified, user_banned
@@ -48,14 +48,12 @@
 - [x] Events: donation_claimed, donation_collected
 
 
-
 ## Core logic
 - [x] Single claim state-machine service
 - [x] Concurrency: select_for_update / atomic conditional update
-- [ ] Concurrency test: simultaneous claims → exactly one wins
+- [x] Concurrency test: simultaneous claims → exactly one wins
 - [x] Expired items flagged + excluded from claimable list
 - [x] Impact points awarded on collection
-
 
 
 ## Analytics / impact
@@ -63,7 +61,6 @@
 - [x] Per-user Social Impact Score
 - [x] Charts on report page
 - [x] Leaderboard on landing/home
-
 
 
 ## Screens
@@ -75,33 +72,47 @@
 - [x] Analytics/impact report
 - [x] 404 / empty / error states
 
+
 ## UI/UX bar
-- [ ] Mobile-first, fast on entry-level phones
-- [ ] Green/white + orange-urgency theme tokens
-- [ ] Readable sans-serif typography
-- [ ] Donate flow ≤ ~30s / 3 steps, large inputs/dropdowns
-- [ ] Live no-refresh updates everywhere specified
-- [ ] Accessibility: contrast, hit targets, semantic HTML, ARIA live regions, keyboard + screen-reader
+- [x] Mobile-first, fast on entry-level phones
+- [x] Green/white + orange-urgency theme tokens
+- [x] Readable sans-serif typography
+- [x] Donate flow ≤ ~30s / 3 steps, large inputs/dropdowns
+- [x] Live no-refresh updates everywhere specified
+- [x] Accessibility: contrast, hit targets, semantic HTML, ARIA live regions, keyboard + screen-reader
+
 
 ## Non-functional
-- [ ] Dashboard < ~2s load
-- [ ] FKs + constraints + indexes
-- [ ] Security: CSRF, parameterized ORM (no SQLi), per-role authz, secrets in env
-- [ ] Scalable structure (add cities without core rewrite)
+- [x] Dashboard < ~2s load
+- [x] FKs + constraints + indexes
+- [x] Security: CSRF, parameterized ORM (no SQLi), per-role authz, secrets in env
+- [x] Scalable structure (add cities without core rewrite)
+
 
 ## Testing (Phase 2)
-- [ ] Unit tests incl. invalid input
-- [ ] Integration tests for full flows
-- [ ] Concurrency/race test
-- [ ] Endpoint stress test (latency numbers recorded)
-- [ ] Mobile dry-run on every screen
-- [ ] Security probes (SQLi, cross-role, CSRF)
+- [x] Unit tests incl. invalid input
+- [x] Integration tests for full flows
+- [x] Concurrency/race test
+- [x] Endpoint stress test (latency numbers recorded)
+- [x] Mobile dry-run on every screen
+- [x] Security probes (SQLi, cross-role, CSRF)
+
 
 ## Docs (synopsis alignment)
-- [ ] Architecture note (MVT mapping)
-- [ ] ER diagram + schema (Mermaid /docs)
-- [ ] DFD Level 0/1/2 (Mermaid /docs)
-- [ ] README local-run guide against Aiven MySQL
+- [x] Architecture note (MVT mapping)
+- [x] ER diagram + schema (Mermaid /docs)
+- [x] DFD Level 0/1/2 (Mermaid /docs)
+- [x] README local-run guide against Aiven MySQL
+
 
 ## Local run
-- [ ] Clone → documented steps → working app on localhost against Aiven MySQL
+- [x] Clone → documented steps → working app on localhost against Aiven MySQL
+
+
+## Demo & Deployment Fixes (Render Optimization)
+- [x] Fixed root-level `/signup/` routing and pre-selection query parameters
+- [x] Fixed logout redirection to `core:home` namespace
+- [x] Integrated one-click pre-fill login drawer for demo users
+- [x] Dockerized the application (Dockerfile + docker-compose.yml)
+- [x] Enabled SQLite Write-Ahead Logging (WAL) and 15s busy_timeout in apps.py
+- [x] Implemented BannedUserMiddleware to instantly terminate session of banned accounts

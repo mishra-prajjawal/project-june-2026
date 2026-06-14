@@ -17,3 +17,11 @@ class HomeViewTests(TestCase):
         response = self.client.get('/some-non-existent-page/')
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, '404.html')
+
+    def test_docs_page_status_code(self):
+        """
+        Verify that the documentation page renders successfully with 200 OK.
+        """
+        response = self.client.get(reverse('core:docs'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'core/docs.html')

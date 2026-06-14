@@ -28,14 +28,14 @@ def donor_dashboard(request):
             break
 
     # Active donations (Available or Claimed)
-    active_donations = Donation.objects.filter(
+    active_donations = Donation.objects.select_related('claimed_by').filter(
         donor=request.user
     ).exclude(
         status=DonationStatus.COLLECTED
     ).order_by('-created_at')
 
     # Past donations (Collected)
-    past_donations = Donation.objects.filter(
+    past_donations = Donation.objects.select_related('claimed_by', 'quality_feedback').filter(
         donor=request.user,
         status=DonationStatus.COLLECTED
     ).order_by('-collected_at')
@@ -85,19 +85,19 @@ def ngo_dashboard(request):
 
     # 1. Fetch available donations that are not expired (ordered by expiry_time)
     now = timezone.now()
-    available_donations = Donation.objects.filter(
+    available_donations = Donation.objects.select_related('donor').filter(
         status=DonationStatus.AVAILABLE,
         expiry_time__gt=now
     ).order_by('expiry_time')
 
     # 2. Fetch current active claims claimed by this NGO
-    my_claims = Donation.objects.filter(
+    my_claims = Donation.objects.select_related('donor').filter(
         status=DonationStatus.CLAIMED,
         claimed_by=request.user
     ).order_by('-created_at')
 
     # 3. Fetch past collected history by this NGO
-    my_history = Donation.objects.filter(
+    my_history = Donation.objects.select_related('donor', 'quality_feedback').filter(
         status=DonationStatus.COLLECTED,
         claimed_by=request.user
     ).order_by('-collected_at')

@@ -84,6 +84,19 @@
   // Run on initial load to match pre-filled/default role selection
   document.addEventListener("DOMContentLoaded", function() {
     const roleSelect = document.getElementById('id_role');
+    
+    // Check URL parameters for role pre-selection (e.g. ?role=NGO)
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
+    if (roleSelect && roleParam) {
+      for (let i = 0; i < roleSelect.options.length; i++) {
+        if (roleSelect.options[i].value === roleParam) {
+          roleSelect.selectedIndex = i;
+          break;
+        }
+      }
+    }
+
     if (roleSelect) {
       toggleDocumentUpload(roleSelect.value);
     }

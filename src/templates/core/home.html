@@ -19,10 +19,10 @@
         FoodConnect enables restaurants, caterers, and venues to quickly list surplus cooked food, getting it securely claimed and collected by verified NGOs before it spoils.
       </p>
       <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-        <a href="{% url 'login' %}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-brand-green hover:bg-brand-green-accent shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+        <a href="{% url 'signup' %}?role=Donor" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-brand-green hover:bg-brand-green-accent shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition duration-200">
           Get Started as Donor
         </a>
-        <a href="{% url 'login' %}" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition duration-200">
+        <a href="{% url 'signup' %}?role=NGO" class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.98] transition duration-200">
           Register NGO / Volunteer
         </a>
       </div>

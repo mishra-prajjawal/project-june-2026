@@ -1,4 +1,7 @@
 import re
+import os
+from django.conf import settings
+from django.http import Http404
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -61,7 +64,10 @@ def admin_panel(request):
             contact_info__icontains=q
         )
 
-    # 3. Calculate system-wide summary metrics
+    # 3. Fetch all donations for monitoring
+    donations = Donation.objects.select_related('donor', 'claimed_by').all().order_by('-created_at')
+
+    # 4. Calculate system-wide summary metrics
     total_users = User.objects.count()
     pending_verifications = pending_ngos.count()
     active_donations = Donation.objects.filter(status=DonationStatus.AVAILABLE).count()
@@ -80,6 +86,7 @@ def admin_panel(request):
     context = {
         'pending_ngos': pending_ngos,
         'users': users,
+        'donations': donations,
         'q': q,
         'metrics': {
             'total_users': total_users,
@@ -103,3 +110,43 @@ def handler500(request):
     Custom handler for 500 (Internal Server Error) errors.
     """
     return render(request, '500.html', status=500)
+
+def docs_view(request):
+    """
+    Renders the documentation dashboard loading markdown files from the docs folder
+    and rendering them dynamically using Marked.js and Mermaid.js.
+    """
+    docs_dir = os.path.join(settings.BASE_DIR, '..', 'docs')
+    
+    # List of available documentation files
+    doc_files = {
+        'architecture': 'architecture.md',
+        'er_diagram': 'er_diagram.md',
+        'dfd_diagrams': 'dfd_diagrams.md',
+        'codebase_guide': 'codebase_guide.md',
+    }
+    
+    selected_doc = request.GET.get('doc', 'architecture')
+    if selected_doc not in doc_files:
+        raise Http404("Documentation not found")
+        
+    doc_path = os.path.join(docs_dir, doc_files[selected_doc])
+    
+    doc_content = ""
+    try:
+        with open(doc_path, 'r', encoding='utf-8') as f:
+            doc_content = f.read()
+    except IOError:
+        doc_content = f"# Error\nFailed to load documentation file: {doc_files[selected_doc]}"
+        
+    context = {
+        'doc_content': doc_content,
+        'selected_doc': selected_doc,
+        'doc_menu': [
+            {'id': 'architecture', 'title': 'System Architecture'},
+            {'id': 'er_diagram', 'title': 'ER Diagram & Schema'},
+            {'id': 'dfd_diagrams', 'title': 'Data Flow Diagrams (DFD)'},
+            {'id': 'codebase_guide', 'title': 'Head-to-Toe Codebase Guide'},
+        ]
+    }
+    return render(request, 'core/docs.html', context)

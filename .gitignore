@@ -24,3 +24,12 @@ npm-debug.log*
 .idea/
 *.swp
 *.swo
+
+# AI generated assets and config
+.gemini/
+.python-version
+db.sqlite3-wal
+db.sqlite3-shm
+
+# Ephemeral deploy docs
+docs/render_guide.md

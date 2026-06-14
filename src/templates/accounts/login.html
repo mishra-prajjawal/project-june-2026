@@ -4,10 +4,41 @@
 
 {% block content %}
 <section class="max-w-md mx-auto my-12 px-4">
-  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg flex flex-col gap-6">
-    <div class="text-center">
+  <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg flex flex-col gap-6 relative">
+    <button onclick="toggleDemoAccounts()" type="button" class="absolute top-4 right-4 p-1 px-2.5 text-gray-400 hover:text-brand-green border border-gray-100 hover:border-brand-green/20 bg-gray-50 hover:bg-brand-green-light rounded-xl transition duration-200 focus:outline-none flex items-center gap-1" title="Show Demo Accounts">
+      <span class="text-[10px] font-extrabold uppercase tracking-wide">Demo Users</span>
+    </button>
+
+    <div class="text-center mt-2">
       <h2 class="text-3xl font-extrabold text-gray-900">Welcome Back</h2>
       <p class="text-xs text-gray-500 mt-1">Sign in to list surplus food or claim donations.</p>
+    </div>
+
+    <!-- Demo Accounts Drawer (hidden by default) -->
+    <div id="demo-accounts-pane" class="hidden flex flex-col gap-3 p-4 bg-gray-50 border border-gray-100 rounded-2xl text-xs">
+      <div class="flex items-center justify-between border-b border-gray-200 pb-2">
+        <h4 class="font-bold text-gray-700">Quick Credentials</h4>
+        <span class="text-[10px] text-gray-400">All passwords: <code class="font-bold text-brand-green font-mono">password</code></span>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="p-2 bg-white rounded-lg border border-gray-100 hover:border-brand-green/30 hover:shadow-sm flex flex-col cursor-pointer transition duration-150" onclick="prefillCredentials('admin')">
+          <span class="font-bold text-gray-900">admin</span>
+          <span class="text-[9px] text-purple-600 font-extrabold uppercase tracking-wide">Admin</span>
+        </div>
+        <div class="p-2 bg-white rounded-lg border border-gray-100 hover:border-brand-green/30 hover:shadow-sm flex flex-col cursor-pointer transition duration-150" onclick="prefillCredentials('donor1')">
+          <span class="font-bold text-gray-900">donor1</span>
+          <span class="text-[9px] text-brand-green-dark font-extrabold uppercase tracking-wide">Donor</span>
+        </div>
+        <div class="p-2 bg-white rounded-lg border border-gray-100 hover:border-brand-green/30 hover:shadow-sm flex flex-col cursor-pointer transition duration-150" onclick="prefillCredentials('ngo1')">
+          <span class="font-bold text-gray-900">ngo1</span>
+          <span class="text-[9px] text-blue-600 font-extrabold uppercase tracking-wide">NGO (Verified)</span>
+        </div>
+        <div class="p-2 bg-white rounded-lg border border-gray-100 hover:border-brand-green/30 hover:shadow-sm flex flex-col cursor-pointer transition duration-150" onclick="prefillCredentials('ngo2')">
+          <span class="font-bold text-gray-900">ngo2</span>
+          <span class="text-[9px] text-brand-orange-dark font-extrabold uppercase tracking-wide">NGO (New)</span>
+        </div>
+      </div>
+      <p class="text-[9px] text-gray-400 text-center">Click any card to pre-fill credentials instantly.</p>
     </div>
 
     {% if form.errors %}
@@ -41,8 +72,26 @@
 
     <div class="text-center text-xs text-gray-500 border-t border-gray-100 pt-4">
       Don't have an account? 
-      <a href="#" class="font-bold text-brand-green hover:underline">Register now</a>
+      <a href="{% url 'signup' %}" class="font-bold text-brand-green hover:underline">Register now</a>
     </div>
   </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleDemoAccounts() {
+    const pane = document.getElementById('demo-accounts-pane');
+    if (pane.classList.contains('hidden')) {
+      pane.classList.remove('hidden');
+    } else {
+      pane.classList.add('hidden');
+    }
+  }
+
+  function prefillCredentials(username) {
+    document.getElementById('id_username').value = username;
+    document.getElementById('id_password').value = 'password';
+  }
+</script>
 {% endblock %}

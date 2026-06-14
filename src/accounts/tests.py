@@ -218,3 +218,26 @@ class AccountsAuthTests(TestCase):
             
         with self.assertRaises(PermissionDenied):
             accounts_services.reject_ngo_user(ngo_user.id, self.regular_donor)
+
+    def test_signup_url_routing_and_logout_redirection(self):
+        """
+        Verify that hitting the direct '/signup/' URL works (returns 200) and
+        logging out redirects cleanly to the homepage (core:home) without error.
+        """
+        # Test signup URL works
+        response = self.client.get('/signup/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'accounts/register.html')
+
+        # Log in first
+        User.objects.create_user(
+            username='logout_test_user',
+            password='d0n0r_P@ssw0rd_987',
+            role=UserRole.DONOR.value
+        )
+        self.client.login(username='logout_test_user', password='d0n0r_P@ssw0rd_987')
+
+        # Test logout POST redirects to homepage
+        logout_response = self.client.post(reverse('logout'))
+        self.assertEqual(logout_response.status_code, 302)
+        self.assertRedirects(logout_response, reverse('core:home'))

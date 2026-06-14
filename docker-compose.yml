@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///db.sqlite3
+      - DEBUG=True
+    volumes:
+      - db-data:/app/src/db.sqlite3
+
+volumes:
+  db-data:

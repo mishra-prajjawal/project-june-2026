@@ -74,6 +74,15 @@ python manage.py runserver
 ```
 Visit the platform at `http://127.0.0.1:8000/`.
 
+### 6. Run with Docker & Docker Compose
+If you prefer to run the application in a fully isolated container:
+
+```bash
+# Build the images and start the container stack
+docker compose up --build
+```
+This command builds the Tailwind CSS files inside a multi-stage builder, runs database migrations, seeds the initial demo user accounts, and boots the application using Gunicorn on `http://127.0.0.1:8000/`.
+
 ---
 
 ## Test Accounts & Developer Credentials
